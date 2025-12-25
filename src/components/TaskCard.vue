@@ -13,16 +13,18 @@
             {{ title }}
           </h3>
           <p v-if="description" class="text-gray-600 text-sm mt-2">{{ description }}</p>
-          <p v-if="dueDate" class="text-gray-500 text-sm mt-2">
-            <span class="font-semibold">Vencimento:</span> {{ formatDate(dueDate) }}
-          </p>
+          <div class="flex items-center gap-3 mt-3">
+            <span v-if="category" class="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-primary">
+              {{ category }}
+            </span>
+          </div>
         </div>
       </div>
       <button
         @click="$emit('delete', id)"
-        class="text-red hover:text-red-600 font-semibold transition-colors"
+        class="text-red hover:text-red-600 font-semibold transition-colors ml-4"
       >
-        Deletar
+        ✕
       </button>
     </div>
   </div>
@@ -39,6 +41,10 @@ defineProps({
     required: true
   },
   description: {
+    type: String,
+    default: ''
+  },
+  category: {
     type: String,
     default: ''
   },

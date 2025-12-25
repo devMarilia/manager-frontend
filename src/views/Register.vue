@@ -102,6 +102,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Input from '@/components/Input.vue'
 import Button from '@/components/Button.vue'
+import authService from '@/services/authService'
 
 const router = useRouter()
 const name = ref('')
@@ -120,13 +121,14 @@ const handleRegister = async () => {
     return
   }
 
-  // TODO: Integrar com authService
-  console.log('Register:', {
-    name: name.value,
-    email: email.value,
-    password: password.value
-  })
-  // router.push('/login')
+  const result = await authService.register(name.value, email.value, password.value)
+  
+  if (result.success) {
+    console.log('Registro bem-sucedido:', result.data)
+    router.push('/tasks')
+  } else {
+    alert(result.error)
+  }
 }
 </script>
 

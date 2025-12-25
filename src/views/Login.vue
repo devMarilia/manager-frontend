@@ -74,6 +74,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Input from '@/components/Input.vue'
 import Button from '@/components/Button.vue'
+import authService from '@/services/authService'
 
 const router = useRouter()
 const email = ref('')
@@ -85,9 +86,14 @@ const handleLogin = async () => {
     return
   }
 
-  // TODO: Integrar com authService
-  console.log('Login:', { email: email.value, password: password.value })
-  // router.push('/tasks')
+  const result = await authService.login(email.value, password.value)
+  
+  if (result.success) {
+    console.log('Login bem-sucedido:', result.data)
+    router.push('/tasks')
+  } else {
+    alert(result.error)
+  }
 }
 </script>
 
