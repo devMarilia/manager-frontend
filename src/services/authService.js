@@ -26,7 +26,7 @@ class AuthService {
 
   async register(name, email, password) {
     try {
-      const response = await api.post('/auth/cadastro', {
+      const response = await api.post('/auth/register', {
         name,
         email,
         password
