@@ -1,8 +1,5 @@
 <template>
   <div class="flex h-screen w-screen overflow-hidden bg-gray-100">
-    <!-- Sidebar -->
-    <Sidebar />
-
     <!-- Conteúdo Principal -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Header -->
@@ -161,7 +158,6 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import Sidebar from '@/components/Sidebar.vue'
 import TaskCard from '@/components/TaskCard.vue'
 import Input from '@/components/Input.vue'
 import Button from '@/components/Button.vue'
