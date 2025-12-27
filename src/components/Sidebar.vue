@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-64 bg-gray-900 text-white flex flex-col h-screen shadow-lg hidden md:flex">
+  <aside class="w-64 bg-gray-900 text-white flex-col h-screen shadow-lg hidden md:flex">
     <!-- Logo -->
     <div class="px-6 py-8 border-b border-gray-800">
       <h1 class="text-2xl font-bold text-primary">Tarefas+</h1>
