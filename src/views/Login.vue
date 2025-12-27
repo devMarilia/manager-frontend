@@ -48,7 +48,7 @@
             backgroundColor="bg-primary"
             textColor="text-white"
             hoverColor="hover:bg-blue-700"
-            @click="handleLogin"
+            type="submit"
           />
         </form>
 
@@ -90,10 +90,11 @@ const handleLogin = async () => {
   
   if (result.success) {
     console.log('Login bem-sucedido:', result.data)
+    console.log('User no localStorage:', localStorage.getItem('user'))
+    console.log('Token no localStorage:', localStorage.getItem('token'))
     // Delay maior para garantir que localStorage foi salvo
-    setTimeout(() => {
-      router.push('/tasks')
-    }, 500)
+    await new Promise(resolve => setTimeout(resolve, 800))
+    router.push('/tasks')
   } else {
     alert(result.error)
   }

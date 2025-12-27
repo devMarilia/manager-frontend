@@ -76,7 +76,7 @@
             backgroundColor="bg-green"
             textColor="text-white"
             hoverColor="hover:bg-emerald-600"
-            @click="handleRegister"
+            type="submit"
           />
         </form>
 
@@ -116,6 +116,11 @@ const handleRegister = async () => {
     return
   }
 
+  if (password.value.length < 6) {
+    alert('Senha deve ter no mínimo 6 caracteres')
+    return
+  }
+
   if (password.value !== confirmPassword.value) {
     alert('As senhas não correspondem')
     return
@@ -124,10 +129,20 @@ const handleRegister = async () => {
   const result = await authService.register(name.value, email.value, password.value)
   
   if (result.success) {
-    console.log('Registro bem-sucedido:', result.data)
+    console.log('Registro e login bem-sucedidos:', result.data)
+    console.log('User no localStorage:', localStorage.getItem('user'))
+    console.log('Token no localStorage:', localStorage.getItem('token'))
+    // Aguarda localStorage ser salvo
+    await new Promise(resolve => setTimeout(resolve, 800))
     router.push('/tasks')
   } else {
-    alert(result.error)
+    // Se o erro for "Email já cadastrado", oferecer opção de login
+    if (result.error && result.error.includes('já cadastrado')) {
+      alert('Este email já está cadastrado. Você será redirecionado para o login.')
+      router.push('/login')
+    } else {
+      alert(result.error)
+    }
   }
 }
 </script>

@@ -7,16 +7,24 @@ class AuthService {
         email,
         password
       })
-      console.log('Resposta login:', response.data)
+      console.log('Resposta completa login:', response.data)
 
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-        console.log('User salvo:', response.data.user)
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
+      // A resposta vem em response.data.data
+      const loginData = response.data.data
+      
+      if (loginData && loginData.token && loginData.user) {
+        localStorage.setItem('token', loginData.token)
+        localStorage.setItem('user', JSON.stringify(loginData.user))
+        console.log('User salvo:', loginData.user)
+        api.defaults.headers.common['Authorization'] = `Bearer ${loginData.token}`
+        return { success: true, data: loginData }
+      } else {
+        console.error('Resposta inválida: falta token ou user', loginData)
+        return { 
+          success: false, 
+          error: 'Resposta inválida do servidor'
+        }
       }
-
-      return { success: true, data: response.data }
     } catch (error) {
       console.error('Erro ao fazer login:', error)
       return { 
@@ -34,13 +42,29 @@ class AuthService {
         password
       })
 
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
+      console.log('Resposta completa registro:', response.data)
+
+      // A resposta vem em response.data.data
+      const registerData = response.data.data
+      
+      if (registerData && registerData.user) {
+        // Tentar fazer login automático com as credenciais fornecidas
+        const loginResult = await this.login(email, password)
+        
+        if (loginResult.success) {
+          console.log('Registro e login automático bem-sucedidos')
+          return { success: true, data: loginResult.data }
+        } else {
+          // Se login falhar, avisar o usuário para fazer login manualmente
+          return { 
+            success: false, 
+            error: 'Usuário registrado, mas faça login manualmente',
+            needsManualLogin: true
+          }
+        }
       }
 
-      return { success: true, data: response.data }
+      return { success: true, data: registerData }
     } catch (error) {
       console.error('Erro ao registrar:', error)
       return { 

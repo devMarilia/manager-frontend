@@ -195,23 +195,49 @@ const loadUser = () => {
     console.log('Nome definido como:', userName.value)
   } else if (user && user.email) {
     userName.value = user.email
+  } else {
+    // Se não conseguir carregar o usuário, volta ao login
+    console.log('Usuário não encontrado, redirecionando para login')
+    router.push('/login')
   }
 }
 
 const loadTasks = () => {
-  const savedTasks = localStorage.getItem('tasks')
+  const user = authService.getCurrentUser()
+  if (!user || !user.email) {
+    console.log('Não há usuário logado')
+    tasks.value = []
+    return
+  }
+
+  // Usar email como chave única para cada usuário
+  const taskKey = `tasks_${user.email}`
+  const savedTasks = localStorage.getItem(taskKey)
+  
   if (savedTasks) {
     try {
       tasks.value = JSON.parse(savedTasks)
+      console.log(`Tarefas carregadas para ${user.email}:`, tasks.value)
     } catch (e) {
       console.error('Erro ao carregar tarefas:', e)
       tasks.value = []
     }
+  } else {
+    tasks.value = []
   }
 }
 
 const saveTasks = () => {
-  localStorage.setItem('tasks', JSON.stringify(tasks.value))
+  const user = authService.getCurrentUser()
+  if (!user || !user.email) {
+    console.log('Não há usuário logado para salvar tarefas')
+    return
+  }
+
+  // Salvar com chave única por usuário
+  const taskKey = `tasks_${user.email}`
+  localStorage.setItem(taskKey, JSON.stringify(tasks.value))
+  console.log(`Tarefas salvas para ${user.email}`)
 }
 
 // Watch para mudanças no localStorage
