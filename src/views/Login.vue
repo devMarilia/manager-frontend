@@ -90,7 +90,10 @@ const handleLogin = async () => {
   
   if (result.success) {
     console.log('Login bem-sucedido:', result.data)
-    router.push('/tasks')
+    // Delay maior para garantir que localStorage foi salvo
+    setTimeout(() => {
+      router.push('/tasks')
+    }, 500)
   } else {
     alert(result.error)
   }

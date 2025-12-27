@@ -31,7 +31,7 @@
               <form @submit.prevent="handleAddTask" class="space-y-4">
                 <!-- Título -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Título <span class="text-red">*</span></label>
                   <Input
                     v-model="newTask.title"
                     type="text"
@@ -40,26 +40,29 @@
                     textColor="text-gray-800"
                     focusColor="focus:border-primary"
                     backgroundColor="bg-white"
+                    required
                   />
                 </div>
 
                 <!-- Descrição -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Descrição <span class="text-red">*</span></label>
                   <textarea
                     v-model="newTask.description"
                     placeholder="Descrição da tarefa"
                     class="w-full px-4 py-2 rounded border-2 border-gray-300 focus:border-primary focus:outline-none transition-colors resize-none"
                     rows="4"
+                    required
                   ></textarea>
                 </div>
 
                 <!-- Categoria -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Categoria <span class="text-red">*</span></label>
                   <select
                     v-model="newTask.category"
                     class="w-full px-4 py-2 rounded border-2 border-gray-300 focus:border-primary focus:outline-none transition-colors bg-white text-gray-800"
+                    required
                   >
                     <option value="">Selecione uma categoria</option>
                     <option value="trabalho">Trabalho</option>
@@ -76,7 +79,7 @@
                   backgroundColor="bg-primary"
                   textColor="text-white"
                   hoverColor="hover:bg-blue-700"
-                  @click="handleAddTask"
+                  type="submit"
                 />
               </form>
             </div>
@@ -156,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '@/components/Sidebar.vue'
 import TaskCard from '@/components/TaskCard.vue'
@@ -169,12 +172,52 @@ const userName = ref('Usuário')
 const tasks = ref([])
 
 // Carregar dados do usuário ao montar
-onMounted(() => {
-  const user = authService.getCurrentUser()
-  if (user && user.name) {
-    userName.value = user.name
+onMounted(async () => {
+  // Aguarda localStorage estar disponível
+  await new Promise(resolve => setTimeout(resolve, 300))
+  await nextTick()
+  loadUser()
+  loadTasks()
+  
+  // Se ainda não carregou, tenta novamente
+  if (userName.value === 'Usuário') {
+    setTimeout(() => {
+      loadUser()
+    }, 500)
   }
 })
+
+const loadUser = () => {
+  const user = authService.getCurrentUser()
+  console.log('Usuário carregado:', user)
+  if (user && user.name) {
+    userName.value = user.name
+    console.log('Nome definido como:', userName.value)
+  } else if (user && user.email) {
+    userName.value = user.email
+  }
+}
+
+const loadTasks = () => {
+  const savedTasks = localStorage.getItem('tasks')
+  if (savedTasks) {
+    try {
+      tasks.value = JSON.parse(savedTasks)
+    } catch (e) {
+      console.error('Erro ao carregar tarefas:', e)
+      tasks.value = []
+    }
+  }
+}
+
+const saveTasks = () => {
+  localStorage.setItem('tasks', JSON.stringify(tasks.value))
+}
+
+// Watch para mudanças no localStorage
+watch(() => localStorage.getItem('user'), () => {
+  loadUser()
+}, { immediate: true })
 
 const newTask = ref({
   title: '',
@@ -199,8 +242,18 @@ const tasksByCategory = computed(() => {
 })
 
 const handleAddTask = async () => {
-  if (!newTask.value.title) {
+  if (!newTask.value.title.trim()) {
     alert('Por favor preencha o título')
+    return
+  }
+
+  if (!newTask.value.description.trim()) {
+    alert('Por favor preencha a descrição')
+    return
+  }
+
+  if (!newTask.value.category) {
+    alert('Por favor selecione uma categoria')
     return
   }
 
@@ -215,6 +268,7 @@ const handleAddTask = async () => {
 
   tasks.value.push(task)
   newTask.value = { title: '', description: '', category: '' }
+  saveTasks()
   // TODO: Salvar na API
 }
 
@@ -222,12 +276,14 @@ const handleToggleTask = (id) => {
   const task = tasks.value.find(t => t.id === id)
   if (task) {
     task.completed = !task.completed
+    saveTasks()
     // TODO: Atualizar na API
   }
 }
 
 const handleDeleteTask = (id) => {
   tasks.value = tasks.value.filter(t => t.id !== id)
+  saveTasks()
   // TODO: Deletar na API
 }
 

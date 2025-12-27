@@ -7,10 +7,12 @@ class AuthService {
         email,
         password
       })
+      console.log('Resposta login:', response.data)
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('user', JSON.stringify(response.data.user))
+        console.log('User salvo:', response.data.user)
         api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
       }
 
